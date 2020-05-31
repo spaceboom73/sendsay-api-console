@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import Sendsay from 'sendsay-api'
+// import Sendsay from 'sendsay-api'
 import Logo from '../../components/Logo'
 import LoginForm from '../../components/LoginForm'
 
