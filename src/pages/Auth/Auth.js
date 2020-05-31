@@ -1,14 +1,16 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import Sendsay from 'sendsay-api'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Logo from '../../components/Logo'
 import LoginForm from '../../components/LoginForm'
 import {
 	loginDataLoaded,
 	loginDataLoading,
 	onLoginError,
+	changeAuthicatedStatus,
 } from '../../redux/actions'
+import { useHistory } from 'react-router-dom'
 
 const AuthContainer = styled.div`
 	display: flex;
@@ -22,32 +24,32 @@ const AuthContainer = styled.div`
 
 export const Auth = () => {
 	const dispatch = useDispatch()
-	const onLogin = () => {
-		dispatch(onLoginError(null))
-	}
+	const browserUrl = useHistory()
+	const isAuthicated = useSelector((state) => state.authicated)
+
 	const onAuth = ({ login, password, sublogin }) => {
 		dispatch(loginDataLoading())
 		const sendsayApi = new Sendsay()
+		const authData = {
+			login,
+			...(sublogin && { sublogin }),
+			password,
+		}
 		sendsayApi
-			.login({
-				login,
-				password,
+			.login(authData)
+			.then(() => {
+				dispatch(onLoginError(null))
+				dispatch(changeAuthicatedStatus(true))
+				localStorage.setItem('authData', JSON.stringify(authData))
+				browserUrl.push('/console')
 			})
-			.then(() => sendsayApi.request({ action: 'pong' }))
-			.then((data) =>
-				sublogin
-					? sendsayApi.login({
-							login,
-							password,
-							sublogin: data.sublogin,
-					  })
-					: onLogin()
-			)
-			.then(() => onLogin())
 			.catch((err) => dispatch(onLoginError(err)))
 			.finally(() => dispatch(loginDataLoaded()))
 	}
 
+	useEffect(() => {
+		if (isAuthicated) browserUrl.push('/console')
+	}, [isAuthicated, browserUrl])
 	return (
 		<AuthContainer>
 			<Logo />

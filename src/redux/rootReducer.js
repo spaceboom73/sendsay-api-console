@@ -1,4 +1,4 @@
-import { LOADED, LOADING, LOGIN_ERROR } from './types'
+import { LOADED, LOADING, LOGIN_ERROR, IS_AUTHICATED } from './types'
 import { combineReducers } from 'redux'
 
 export const loginButtonLoadingReducer = (state = false, action) => {
@@ -17,7 +17,15 @@ export const loginErrorReducer = (state = null, action) => {
 	return state
 }
 
+export const authicatedReducer = (state = false, action) => {
+	if (action.type === IS_AUTHICATED) {
+		return action.payload
+	}
+	return state
+}
+
 export const rootReducer = combineReducers({
 	loginButton: loginButtonLoadingReducer,
 	loginError: loginErrorReducer,
+	authicated: authicatedReducer,
 })
