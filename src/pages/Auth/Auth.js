@@ -1,8 +1,14 @@
 import React from 'react'
 import styled from 'styled-components'
-// import Sendsay from 'sendsay-api'
+import Sendsay from 'sendsay-api'
+import { useDispatch } from 'react-redux'
 import Logo from '../../components/Logo'
 import LoginForm from '../../components/LoginForm'
+import {
+	loginDataLoaded,
+	loginDataLoading,
+	onLoginError,
+} from '../../redux/actions'
 
 const AuthContainer = styled.div`
 	display: flex;
@@ -15,60 +21,31 @@ const AuthContainer = styled.div`
 `
 
 export const Auth = () => {
+	const dispatch = useDispatch()
+	const onLogin = () => {
+		dispatch(onLoginError(null))
+	}
 	const onAuth = ({ login, password, sublogin }) => {
-		// const sendsayApiConnect = new Sendsay()
-		// sendsayApiConnect
-		// 	.login({
-		// 		login,
-		// 		...(sublogin && { sublogin }),
-		// 		password,
-		// 	})
-		// 	.then(() => {
-		// 		sendsayApiConnect
-		// 			.request({
-		// 				action: 'ping',
-		// 			})
-		// 			.then((response) => console.log(response))
-		// 		sendsayApiConnect
-		// 			.request({
-		// 				action: 'pong',
-		// 			})
-		// 			.then((response) => console.log(response))
-		// 	})
-		// sendsayApiConnect
-		// 	.request({
-		// 		action: 'login',
-		// 		login,
-		// 		...(sublogin && { sublogin }),
-		// 		password,
-		// 	})
-		// 	.then((data) => console.log(data))
-		// .login({
-		// 	login,
-		// 	...(sublogin && { sublogin }),
-		// 	password,
-		// })
-		// .then(() => {
-		// 	console.log('test')
-		// const sendsayApi = new Sendsay({
-		// 	login,
-		// 	...(sublogin && { sublogin }),
-		// 	password,
-		// })
-		// sendsayApi
-		// 	.request({ action: 'pong' })
-		// 	.then((response) => console.log(response))
-		// })
-		// sendsayApi
-		// 	.login()
-		// 	.then((response) => {
-		// 		sendsayApi.setSession()
-		// 		console.log(sendsayApi.setSessionFromCookie())
-		// 		console.log(sendsayApi)
-		// 	})
-		// 	.catch((err) => {
-		// 		console.log('произошла ошибка')
-		// 	})
+		dispatch(loginDataLoading())
+		const sendsayApi = new Sendsay()
+		sendsayApi
+			.login({
+				login,
+				password,
+			})
+			.then(() => sendsayApi.request({ action: 'pong' }))
+			.then((data) =>
+				sublogin
+					? sendsayApi.login({
+							login,
+							password,
+							sublogin: data.sublogin,
+					  })
+					: onLogin()
+			)
+			.then(() => onLogin())
+			.catch((err) => dispatch(onLoginError(err)))
+			.finally(() => dispatch(loginDataLoaded()))
 	}
 
 	return (

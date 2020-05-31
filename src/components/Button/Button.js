@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
+import iconLoading from '../../assets/images/loader.svg'
 
 const ButtonStyled = styled.button`
 	display: flex;
@@ -9,7 +10,8 @@ const ButtonStyled = styled.button`
 	cursor: pointer;
 	border: none;
 	padding: 5px 20px;
-	flex-basis: 90px;
+	min-width: 90px;
+	line-height: 24px;
 	${({ styleType, disabled }) =>
 		styleType === 'submit' &&
 		`
@@ -38,9 +40,27 @@ const ButtonStyled = styled.button`
 		`}
 `
 
+const LoadingIcon = styled.div`
+	height: 24px;
+	width: 24px;
+	background: url(${iconLoading});
+	animation: 0.7s infinite linear rotate;
+	@keyframes rotate {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+`
 export const Button = (params) => {
-	const { children } = params
-	return <ButtonStyled {...params}>{children}</ButtonStyled>
+	const { children, loading } = params
+	return (
+		<ButtonStyled {...params}>
+			{loading === 'true' ? <LoadingIcon /> : children}
+		</ButtonStyled>
+	)
 }
 
 Button.propTypes = {
@@ -48,4 +68,5 @@ Button.propTypes = {
 		.isRequired,
 	styleType: PropTypes.string,
 	disabled: PropTypes.bool,
+	loading: PropTypes.string,
 }

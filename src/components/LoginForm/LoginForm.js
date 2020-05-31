@@ -3,6 +3,8 @@ import { Form, Input } from 'antd'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import Button from '../../components/Button'
+import { useSelector } from 'react-redux'
+import pokerFaceIcon from '../../assets/images/pokerface.svg'
 
 const StyledForm = styled(Form)`
 	display: flex;
@@ -68,6 +70,34 @@ const NoValidateStyled = styled.p`
 	font-size: 11px;
 	color: red;
 `
+const ErrorBounderStyled = styled.div`
+	display: flex;
+	flex-direction: column;
+	padding: 10px;
+	width: 100%;
+	background: rgba(207, 44, 0, 0.1);
+	color: #cf2c00;
+	border-radius: 5px;
+	p {
+		opacity: 0.5;
+		font-size: 12px;
+		margin: 0 0 0 34px;
+	}
+	div {
+		display: flex;
+		align-items: center;
+		p {
+			margin: 0 0 0 10px;
+			font-size: 18px;
+			opacity: 1;
+		}
+	}
+`
+const PokerFaceIcon = styled.div`
+	width: 24px;
+	height: 24px;
+	background: url(${pokerFaceIcon}) no-repeat;
+`
 
 export const LoginForm = ({ onSubmit }) => {
 	const [validated, setValidate] = useState({
@@ -78,6 +108,11 @@ export const LoginForm = ({ onSubmit }) => {
 			status: 'success',
 		},
 	})
+
+	const [buttonLoading, loginError] = useSelector((state) => [
+		state.loginButton,
+		state.loginError,
+	])
 
 	const formValidate = (items) => {
 		const validator = (value, regExp, text) => {
@@ -153,6 +188,11 @@ export const LoginForm = ({ onSubmit }) => {
 		return length === count
 	}
 
+	const toTextFormat = (object) =>
+		JSON.stringify(object)
+			.replace(/"([\w$]{1,})":/gm, '$1: ')
+			.replace(/(",)/gm, '$1 ')
+
 	return (
 		<div>
 			<StyledForm
@@ -166,6 +206,15 @@ export const LoginForm = ({ onSubmit }) => {
 				}}
 			>
 				<h1>API-консолька</h1>
+				{loginError && (
+					<ErrorBounderStyled>
+						<div>
+							<PokerFaceIcon />
+							<p>Вход не вышел</p>
+						</div>
+						<p>{toTextFormat(loginError)}</p>
+					</ErrorBounderStyled>
+				)}
 				<FormItemStyled name="login" validated={validated}>
 					<div>
 						<span>Логин</span>
@@ -200,6 +249,7 @@ export const LoginForm = ({ onSubmit }) => {
 					<Button
 						styleType="submit"
 						htmlType="submit"
+						loading={buttonLoading.toString()}
 						disabled={!isValidate(validated)}
 					>
 						Войти
