@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import Sendsay from 'sendsay-api'
@@ -67,6 +67,7 @@ export const Console = () => {
 	}, [isAuthicated, history])
 
 	useEffect(() => {
+		document.onfullscreenchange = () => setFullscreen((prevState) => !prevState)
 		const data = JSON.parse(localStorage.getItem('authData'))
 		setConnection(
 			new Sendsay({
@@ -75,6 +76,9 @@ export const Console = () => {
 				},
 			})
 		)
+		return () => {
+			document.onfullscreenchange = () => {}
+		}
 	}, [])
 	useEffect(() => {
 		apiConnection &&
@@ -98,16 +102,12 @@ export const Console = () => {
 		history.push('/auth')
 	}
 	const toggleFullScreen = () => {
-		var doc = document.documentElement,
+		const doc = document.documentElement,
 			state = document.webkitIsFullScreen || document.isFullScreen,
 			requestFunc = doc.requestFullscreen || doc.webkitRequestFullScreen,
 			cancelFunc = document.cancelFullScreen || document.webkitCancelFullScreen
 
 		!state ? requestFunc.call(doc) : cancelFunc.call(document)
-	}
-	const fullScreenChange = () => {
-		toggleFullScreen()
-		setFullscreen((prevState) => !prevState)
 	}
 
 	return (
@@ -145,7 +145,7 @@ export const Console = () => {
 								marginLeft={20}
 								padding="7px"
 								styleType="nonBackground"
-								onClick={fullScreenChange}
+								onClick={toggleFullScreen}
 							>
 								{isFullscreen ? (
 									<CloseFullscreenIcon />
