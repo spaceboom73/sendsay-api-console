@@ -4,7 +4,8 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import Button from '../../components/Button'
 import { useSelector } from 'react-redux'
-import pokerFaceIcon from '../../assets/images/pokerface.svg'
+import { ReactComponent as PokerFaceIcon } from '../../assets/images/pokerface.svg'
+import TextArea from '../TextArea'
 
 const StyledForm = styled(Form)`
 	display: flex;
@@ -27,13 +28,6 @@ const FormItemStyled = styled(Form.Item)`
 	flex-direction: column;
 	width: 100%;
 	margin: 20px 0 0 0;
-	span {
-		font-size: 16px;
-		color: #0d0d0d;
-		&:last-child {
-			color: #999999;
-		}
-	}
 	span,
 	input {
 		transition: all 0.7s;
@@ -76,9 +70,8 @@ const ErrorBounderStyled = styled.div`
 	padding: 10px;
 	width: 100%;
 	background: rgba(207, 44, 0, 0.1);
-	color: #cf2c00;
 	border-radius: 5px;
-	p {
+	span {
 		opacity: 0.5;
 		font-size: 12px;
 		margin: 0 0 0 34px;
@@ -86,17 +79,12 @@ const ErrorBounderStyled = styled.div`
 	div {
 		display: flex;
 		align-items: center;
-		p {
+		span {
 			margin: 0 0 0 10px;
 			font-size: 18px;
 			opacity: 1;
 		}
 	}
-`
-const PokerFaceIcon = styled.div`
-	width: 24px;
-	height: 24px;
-	background: url(${pokerFaceIcon}) no-repeat;
 `
 
 export const LoginForm = ({ onSubmit }) => {
@@ -210,14 +198,14 @@ export const LoginForm = ({ onSubmit }) => {
 					<ErrorBounderStyled>
 						<div>
 							<PokerFaceIcon />
-							<p>Вход не вышел</p>
+							<TextArea color="#cf2c00">Вход не вышел</TextArea>
 						</div>
-						<p>{toTextFormat(loginError)}</p>
+						<TextArea color="#cf2c00">{toTextFormat(loginError)}</TextArea>
 					</ErrorBounderStyled>
 				)}
 				<FormItemStyled name="login" validated={validated}>
 					<div>
-						<span>Логин</span>
+						<TextArea>Логин</TextArea>
 						<InputStyled onClick={() => stopValidationOnInput('login')} />
 						{validated.login.status === 'invalid' && (
 							<NoValidateStyled>{validated.login.text}</NoValidateStyled>
@@ -227,15 +215,15 @@ export const LoginForm = ({ onSubmit }) => {
 				<FormItemStyled name="sublogin">
 					<div>
 						<MoreTitleStyled>
-							<span>Сублогин</span>
-							<span>Опционально</span>
+							<TextArea>Сублогин</TextArea>
+							<TextArea color="#999999">Опционально</TextArea>
 						</MoreTitleStyled>
 						<InputStyled />
 					</div>
 				</FormItemStyled>
 				<FormItemStyled name="password" validated={validated}>
 					<div>
-						<span>Пароль</span>
+						<TextArea>Пароль</TextArea>
 						<InputStyled
 							type="password"
 							onClick={() => stopValidationOnInput('password')}

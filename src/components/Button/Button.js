@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import iconLoading from '../../assets/images/loader.svg'
+import { ReactComponent as IconLoading } from '../../assets/images/loader.svg'
 
 const ButtonStyled = styled.button`
 	display: flex;
@@ -9,9 +9,8 @@ const ButtonStyled = styled.button`
 	align-items: center;
 	cursor: pointer;
 	border: none;
-	padding: 5px 20px;
-	min-width: 90px;
 	line-height: 24px;
+	padding: ${({ padding }) => (padding ? padding : '5px 32px')};
 	${({ styleType, disabled }) =>
 		styleType === 'submit' &&
 		`
@@ -38,12 +37,26 @@ const ButtonStyled = styled.button`
 					`
 			}
 		`}
+	${({ styleType }) =>
+		styleType === 'nonBackground' &&
+		`background-color: transparent;
+		color: #0D0D0D;
+		border-radius: 7px;
+		border: 2px solid transparent;
+		&:hover, &:focus {
+			color: #0055FB;
+			outline: none;
+			svg path {
+				stroke: #0055FB;
+			}
+		}
+		&:focus {
+			border-color: #45A5FF;
+		}
+		`}
 `
 
-const LoadingIcon = styled.div`
-	height: 24px;
-	width: 24px;
-	background: url(${iconLoading});
+const Loader = styled(IconLoading)`
 	animation: 0.7s infinite linear rotate;
 	@keyframes rotate {
 		from {
@@ -58,15 +71,19 @@ export const Button = (params) => {
 	const { children, loading } = params
 	return (
 		<ButtonStyled {...params}>
-			{loading === 'true' ? <LoadingIcon /> : children}
+			{loading === 'true' ? <Loader /> : children}
 		</ButtonStyled>
 	)
 }
 
 Button.propTypes = {
-	children: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
-		.isRequired,
+	children: PropTypes.oneOfType([
+		PropTypes.string,
+		PropTypes.array,
+		PropTypes.object,
+	]).isRequired,
 	styleType: PropTypes.string,
+	padding: PropTypes.string,
 	disabled: PropTypes.bool,
 	loading: PropTypes.string,
 }
