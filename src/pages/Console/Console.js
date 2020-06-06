@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import Sendsay from 'sendsay-api'
@@ -11,16 +11,15 @@ import Button from '../../components/Button'
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg'
 import { ReactComponent as OpenFullscreenIcon } from '../../assets/images/openfullscreen.svg'
 import { ReactComponent as CloseFullscreenIcon } from '../../assets/images/closefullscreen.svg'
+import { ReactComponent as DeleteHistoryIcon } from '../../assets/images/deleteHistory.svg'
 import { changeAuthicatedStatus } from '../../redux/actions'
 
 const ConsolePageContainer = styled.div`
 	display: flex;
-	width: 100vw;
-	height: 100vh;
 `
 const ConsoleContainer = styled.div`
-	flex: 1 0 400px;
-	min-height: 400px;
+	flex: 1 0 640px;
+	min-height: 520px;
 `
 const HeaderContainer = styled.div`
 	display: flex;
@@ -30,25 +29,72 @@ const HeaderContainer = styled.div`
 `
 const LeftSideContainer = styled.div`
 	display: flex;
-	span {
-		margin-left: 20px;
-	}
+	justify-content: space-between;
+	align-items: center;
+	flex: 0 1 271px;
+	margin-right: 10px;
 `
 const RightSideContainer = styled.div`
 	display: flex;
 `
 const UserInfoStyled = styled.div`
 	display: flex;
+	align-items: center;
 	padding: 5px 15px;
 	margin-right: 26px;
 	border: 1px solid rgba(0, 0, 0, 0.2);
 	border-radius: 5px;
 `
+const HistoryContainer = styled.div`
+	display: flex;
+	background-color: #f6f6f6;
+	border-top: 1px solid rgba(0, 0, 0, 0.2);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+	height: 50px;
+	max-width: 100vw;
+	min-width: 640px;
+`
+const HistoryList = styled.div`
+	flex: 1 1 1374px;
+	display: flex;
+	padding: 10px 0 10px 15px;
+	white-space: nowrap;
+	width: 100%;
+	overflow: auto;
+	scrollbar-width: none;
+	&::-webkit-scrollbar {
+		width: 0;
+		height: 0;
+	}
+`
 const StyledLogout = styled(LogoutIcon)`
 	${({ margin }) => `margin-${margin}: 8px;`}
 `
-const StyledButton = styled(Button)`
+const StyledFullscreen = styled(Button)`
 	${({ marginLeft }) => `margin-left: ${marginLeft}px;`}
+`
+const StyledDeleteButton = styled(Button)`
+	background-color: #f6f6f6;
+	border-radius: 0;
+	border: none;
+	border-left: 1px solid #c4c4c4;
+	&:focus {
+		color: #c4c4c4;
+		border-color: #c4c4c4;
+	}
+`
+const GradientEffect = styled.div`
+	position: relative;
+	width: 15px;
+	margin-right: -15px;
+	height: 48px;
+	left: -29px;
+	background: linear-gradient(
+		269.98deg,
+		#f6f6f6 0.06%,
+		rgba(246, 246, 246, 0) 99.93%
+	);
+	pointer-events: none;
 `
 
 export const Console = () => {
@@ -138,10 +184,10 @@ export const Console = () => {
 								styleType="nonBackground"
 								onClick={logout}
 							>
-								Выйти
+								<TextArea>Выйти</TextArea>
 								<StyledLogout margin="left" />
 							</Button>
-							<StyledButton
+							<StyledFullscreen
 								marginLeft={20}
 								padding="7px"
 								styleType="nonBackground"
@@ -152,9 +198,27 @@ export const Console = () => {
 								) : (
 									<OpenFullscreenIcon />
 								)}
-							</StyledButton>
+							</StyledFullscreen>
 						</RightSideContainer>
 					</HeaderContainer>
+					<HistoryContainer>
+						<HistoryList>
+							test test testtest test testtest test testtest test testtest test
+							testtest test testtest test testtest test testtest test testtest
+							test testtest test testtest test testtest test testtest test
+							testtest test testtest test testtest test testtest test testtest
+							test testtest test testtest test testtest test testtest test
+							testtest test testtest test testtest test testtest test testtest
+							test testtest test testtest test testtest test testtest test
+							testtest test testtest test testtest test testtest test testtest
+							test testtest test testtest test testtest test testtest test
+							testtest test testtest test testtest test test
+						</HistoryList>
+						<StyledDeleteButton styleType="nonBackground" padding="0 13px">
+							<GradientEffect />
+							<DeleteHistoryIcon />
+						</StyledDeleteButton>
+					</HistoryContainer>
 				</ConsoleContainer>
 			</ConsolePageContainer>
 		)
