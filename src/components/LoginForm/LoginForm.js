@@ -240,7 +240,7 @@ export const LoginForm = ({ onSubmit }) => {
 						loading={buttonLoading.toString()}
 						disabled={!isValidate(validated)}
 					>
-						Войти
+						<TextArea color="#FFFFFF">Войти</TextArea>
 					</Button>
 				</Form.Item>
 			</StyledForm>

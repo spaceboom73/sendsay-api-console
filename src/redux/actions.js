@@ -1,4 +1,11 @@
-import { LOADED, LOADING, LOGIN_ERROR, IS_AUTHICATED } from './types'
+import {
+	LOADED,
+	LOADING,
+	LOGIN_ERROR,
+	IS_AUTHICATED,
+	DD_TOGGLED,
+	COPY_ANIMATION,
+} from './types'
 
 export function loginDataLoaded() {
 	return {
@@ -19,6 +26,18 @@ export function onLoginError(payload) {
 export function changeAuthicatedStatus(payload) {
 	return {
 		type: IS_AUTHICATED,
+		payload,
+	}
+}
+export function toggleDropDown(payload) {
+	return {
+		type: DD_TOGGLED,
+		payload,
+	}
+}
+export function inAnimation(payload) {
+	return {
+		type: COPY_ANIMATION,
 		payload,
 	}
 }

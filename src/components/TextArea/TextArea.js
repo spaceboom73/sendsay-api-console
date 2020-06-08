@@ -1,9 +1,8 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import styled from 'styled-components'
-import PropTypes from 'prop-types'
 
 const Text = styled.span`
-	${({ color, fontSize, whiteSpace }) =>
+	${({ color, fontSize, whiteSpace, width }) =>
 		`color: ${color};
 		font-size: ${fontSize}px;
 		white-space: ${whiteSpace};
@@ -22,22 +21,15 @@ const Text = styled.span`
 	`}
 `
 
-export const TextArea = ({
-	color = '#0D0D0D',
-	fontSize = 16,
-	whiteSpace = 'break-space',
-	children,
-}) => {
+const TextArea = (
+	{ color = '#0D0D0D', fontSize = 16, whiteSpace = 'break-spaces', children },
+	ref
+) => {
 	return (
-		<Text color={color} whiteSpace={whiteSpace} fontSize={fontSize}>
+		<Text ref={ref} color={color} whiteSpace={whiteSpace} fontSize={fontSize}>
 			{children}
 		</Text>
 	)
 }
 
-TextArea.propTypes = {
-	color: PropTypes.string,
-	fontSize: PropTypes.number,
-	whiteSpace: PropTypes.string,
-	children: PropTypes.string.isRequired,
-}
+export default forwardRef(TextArea)

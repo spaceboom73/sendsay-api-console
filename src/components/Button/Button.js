@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { ReactComponent as IconLoading } from '../../assets/images/loader.svg'
@@ -46,6 +46,9 @@ const ButtonStyled = styled.button`
 		&:hover, &:focus {
 			color: #0055FB;
 			outline: none;
+			span {
+				color: #0055FB;
+			}
 			svg path {
 				stroke: #0055FB;
 			}
@@ -57,6 +60,7 @@ const ButtonStyled = styled.button`
 `
 
 const Loader = styled(IconLoading)`
+	width: ${({ width }) => width}px;
 	animation: 0.7s infinite linear rotate;
 	@keyframes rotate {
 		from {
@@ -69,9 +73,18 @@ const Loader = styled(IconLoading)`
 `
 export const Button = (params) => {
 	const { children, loading } = params
+
+	const [buttonWidth, setWidth] = useState(0)
+	const button = useRef()
+	useEffect(() => {
+		if (button.current) {
+			setWidth(button.current.getBoundingClientRect().width - 20)
+		}
+	}, [button])
+
 	return (
-		<ButtonStyled {...params}>
-			{loading === 'true' ? <Loader /> : children}
+		<ButtonStyled ref={button} {...params}>
+			{loading === 'true' ? <Loader width={buttonWidth} /> : children}
 		</ButtonStyled>
 	)
 }

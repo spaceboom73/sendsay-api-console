@@ -1,1 +1,2 @@
-export { TextArea as default } from './TextArea'
+import TextArea from './TextArea'
+export { TextArea as default }

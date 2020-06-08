@@ -1,4 +1,11 @@
-import { LOADED, LOADING, LOGIN_ERROR, IS_AUTHICATED } from './types'
+import {
+	LOADED,
+	LOADING,
+	LOGIN_ERROR,
+	IS_AUTHICATED,
+	DD_TOGGLED,
+	COPY_ANIMATION,
+} from './types'
 import { combineReducers } from 'redux'
 
 export const loginButtonLoadingReducer = (state = false, action) => {
@@ -24,8 +31,24 @@ export const authicatedReducer = (state = false, action) => {
 	return state
 }
 
+export const dropDownToggleReducer = (state = -1, action) => {
+	if (action.type === DD_TOGGLED) {
+		return action.payload
+	}
+	return state
+}
+
+export const inCopyAnimationReducer = (state = false, action) => {
+	if (action.type === COPY_ANIMATION) {
+		return action.payload
+	}
+	return state
+}
+
 export const rootReducer = combineReducers({
 	loginButton: loginButtonLoadingReducer,
 	loginError: loginErrorReducer,
 	authicated: authicatedReducer,
+	dropDownToggle: dropDownToggleReducer,
+	inCopyAnimation: inCopyAnimationReducer,
 })
