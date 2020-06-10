@@ -18,15 +18,20 @@ import { ReactComponent as CloseFullscreenIcon } from '../../assets/images/close
 import { ReactComponent as DeleteHistoryIcon } from '../../assets/images/deleteHistory.svg'
 import { ReactComponent as DragNDropIcon } from '../../assets/images/dragdrop.svg'
 import { ReactComponent as FormatIcon } from '../../assets/images/format.svg'
+import { ReactComponent as LoadingIcon } from '../../assets/images/loader.svg'
 import { changeAuthicatedStatus, toggleDropDown } from '../../redux/actions'
 import { ConsoleWindow } from '../../components/ConsoleWindow/ConsoleWindow'
+import { GitLink } from '../../components/GitLink/GitLink'
 
 const ConsolePageContainer = styled.div`
 	display: flex;
+	height: 100vh;
+	min-height: 520px;
 `
 const ConsoleContainer = styled.div`
+	display: flex;
+	flex-direction: column;
 	flex: 1 0 640px;
-	min-height: 520px;
 `
 const HeaderContainer = styled.div`
 	display: flex;
@@ -79,7 +84,7 @@ const StyledLogoutIcon = styled(LogoutIcon)`
 	margin-left: 8px;
 `
 const StyledFullscreen = styled(Button)`
-	${({ marginLeft }) => `margin-left: ${marginLeft}px;`}
+	margin-left: 20px;
 `
 const StyledDeleteButton = styled(Button)`
 	background-color: #f6f6f6;
@@ -124,83 +129,36 @@ const StyledDragIcon = styled(DragNDropIcon)`
 const FooterContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	padding: 15px;
 	border-top: 1px solid rgba(0, 0, 0, 0.2);
 `
 const StyledFormatIcon = styled(FormatIcon)`
 	margin-right: 8px;
 `
-
-const historyItems = [
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: false,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: false,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: false,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: false,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: false,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: true,
-		query: 'pong',
-	},
-	{
-		success: false,
-		query: 'pong',
-	},
-]
+const LoadingContainer = styled.div`
+	height: 100vh;
+	width: 100vw;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	svg {
+		height: 35px;
+		width: 35px;
+		animation: 0.8s infinite linear rotate;
+		@keyframes rotate {
+			from {
+				transform: rotate(0deg);
+			}
+			to {
+				transform: rotate(360deg);
+			}
+		}
+		path {
+			stroke: black;
+		}
+	}
+`
 
 let isDispatching = false
 export const Console = () => {
@@ -211,11 +169,21 @@ export const Console = () => {
 	const history = useHistory()
 	const [isFullscreen, setFullscreen] = useState(false)
 	const [apiConnection, setConnection] = useState(null)
-	const [pageLoaded, updateLoaded] = useState(false)
+	const [pageLoaded, updatePageLoaded] = useState(false)
 	const [userData, setUserData] = useState({
 		login: '',
 		sublogin: '',
 	})
+	const [queryJSON, setQueryJSON] = useState('{"action":"pong"}')
+	const [responseJSON, setResponseJSON] = useState('')
+	const [errorsWindows, setErrorsWindows] = useState({
+		query: false,
+		response: false,
+	})
+	const [historyItems, setHistoryItems] = useState([])
+	const [windowsProportion, updateProportion] = useState([])
+	const [loadingButtonState, setButtonLoading] = useState('false')
+
 	const historyList = useRef()
 	useEffect(() => {
 		if (!isAuthicated) history.push('/auth')
@@ -255,17 +223,25 @@ export const Console = () => {
 				})
 				.then((res) => {
 					const { sublogin } = JSON.parse(localStorage.getItem('authData'))
-					updateLoaded(true)
+					updatePageLoaded(true)
 					setUserData({
 						login: res.account,
 						...(sublogin && { sublogin: res.sublogin }),
 					})
+					const historyOfStorage = localStorage.getItem('history')
+					const proportionOfStorage = localStorage.getItem('proportion')
+					setHistoryItems(historyOfStorage ? JSON.parse(historyOfStorage) : [])
+					updateProportion(
+						proportionOfStorage ? JSON.parse(proportionOfStorage) : [50, 50]
+					)
 				})
 	}, [apiConnection])
 
 	const logout = () => {
 		localStorage.removeItem('authData')
 		dispatch(changeAuthicatedStatus(false))
+		arrayToStorage('history', [])
+		arrayToStorage('proportion', [])
 		history.push('/auth')
 	}
 	const toggleFullScreen = () => {
@@ -281,89 +257,224 @@ export const Console = () => {
 				document.exitFullscreen
 		!state ? requestFunc.call(doc) : cancelFunc.call(document)
 	}
+	const isValidJSON = (text) => {
+		try {
+			JSON.parse(text)
+		} catch (e) {
+			return false
+		}
+		return true
+	}
+	const arrayToStorage = (storageKey, array) =>
+		array.length
+			? localStorage.setItem(storageKey, JSON.stringify(array))
+			: localStorage.removeItem(storageKey)
 
-	return (
-		pageLoaded && (
-			<ConsolePageContainer>
-				<ConsoleContainer>
-					<HeaderContainer>
-						<LeftSideContainer>
-							<Logo />
-							<TextArea fontSize={20} whiteSpace="nowrap">
-								API-консолька
-							</TextArea>
-						</LeftSideContainer>
-						<RightSideContainer>
-							<UserInfoStyled>
-								<TextArea>{userData.login}</TextArea>
-								{userData.sublogin && (
-									<React.Fragment>
-										<TextArea color="rgba(0, 0, 0, 0.2)">
-											&nbsp;:&nbsp;
-										</TextArea>
-										<TextArea>{userData.sublogin}</TextArea>
-									</React.Fragment>
-								)}
-							</UserInfoStyled>
-							<Button
-								padding="4px 6px"
-								styleType="nonBackground"
-								onClick={logout}
-							>
-								<TextArea>Выйти</TextArea>
-								<StyledLogoutIcon />
-							</Button>
-							<StyledFullscreen
-								marginLeft={20}
-								padding="7px"
-								styleType="nonBackground"
-								onClick={toggleFullScreen}
-							>
-								{isFullscreen ? (
-									<CloseFullscreenIcon />
-								) : (
-									<OpenFullscreenIcon />
-								)}
-							</StyledFullscreen>
-						</RightSideContainer>
-					</HeaderContainer>
-					<HistoryContainer>
-						<HistoryList ref={historyList} scrollBlock={inCopyAnimation}>
-							{historyItems.map(({ success, query }, id) => (
-								<HistoryItem id={id} key={id} success={success} query={query} />
-							))}
-						</HistoryList>
-						<StyledDeleteButton styleType="nonBackground" padding="0 13px">
-							<GradientEffect />
-							<DeleteHistoryIcon />
-						</StyledDeleteButton>
-					</HistoryContainer>
-					<StyledSplit
-						sizes={[50, 50]}
-						gutterAlign="center"
-						gutter={() => {
-							const div = document.createElement('div')
-							div.innerHTML = ReactDOMServer.renderToStaticMarkup(
-								<StyledDragIcon />
-							)
-							return div.firstChild
-						}}
-						cursor="col-resize"
-					>
-						<ConsoleWindow title="Запрос:" lock={false} error={true} />
-						<ConsoleWindow title="Ответ:" lock={true} error={false} />
-					</StyledSplit>
-					<FooterContainer>
-						<Button padding="5px 18px" styleType="submit">
-							<TextArea color="#FFFFFF">Отправить</TextArea>
-						</Button>
-						<Button padding="6px 4px" styleType="nonBackground">
-							<StyledFormatIcon />
-							<TextArea>Форматировать</TextArea>
-						</Button>
-					</FooterContainer>
-				</ConsoleContainer>
-			</ConsolePageContainer>
+	const queryGo = (json) => {
+		setResponseJSON('')
+		setButtonLoading('true')
+		const request = JSON.parse(json)
+		const historyData = request['action']
+		let success = null
+		apiConnection &&
+			apiConnection
+				.request(request)
+				.then((res) => {
+					setResponseJSON(JSON.stringify(res))
+					setErrorsWindows((prevState) => ({ ...prevState, response: false }))
+					success = true
+				})
+				.catch((err) => {
+					setResponseJSON(JSON.stringify(err))
+					setErrorsWindows((prevState) => ({ ...prevState, response: true }))
+					success = false
+				})
+				.finally(() => {
+					setButtonLoading('false')
+					setHistoryItems((prevState) => {
+						const queryArray = prevState.map((item) => item.queryName)
+						const indexInHistory = queryArray.indexOf(historyData)
+						const historyArray =
+							indexInHistory === -1
+								? [
+										{
+											success,
+											queryName: historyData,
+											queryBody: json,
+										},
+										...prevState,
+								  ]
+								: prevState.splice(indexInHistory, 1) && [
+										{
+											success,
+											queryName: historyData,
+											queryBody: json,
+										},
+										...prevState,
+								  ]
+						arrayToStorage('history', historyArray)
+						return historyArray
+					})
+				})
+	}
+	const formatWindows = () => {
+		setQueryJSON((prevState) => {
+			if (isValidJSON(prevState))
+				return JSON.stringify(JSON.parse(prevState), null, 4)
+			setErrorsWindows((prevState) => ({
+				...prevState,
+				query: true,
+			}))
+			return prevState
+		})
+		setResponseJSON((prevState) =>
+			prevState.length
+				? JSON.stringify(JSON.parse(prevState), null, 4)
+				: prevState
 		)
+	}
+	const clearHistory = () => {
+		historyItems.length && setHistoryItems([])
+		arrayToStorage('history', [])
+	}
+	const removeHistoryItem = (id) =>
+		setHistoryItems((prevState) => {
+			prevState.splice(id, 1)
+			arrayToStorage('history', prevState)
+			return prevState
+		})
+
+	return pageLoaded ? (
+		<ConsolePageContainer>
+			<ConsoleContainer>
+				<HeaderContainer>
+					<LeftSideContainer>
+						<Logo />
+						<TextArea fontSize={20} whiteSpace="nowrap">
+							API-консолька
+						</TextArea>
+					</LeftSideContainer>
+					<RightSideContainer>
+						<UserInfoStyled>
+							<TextArea>{userData.login}</TextArea>
+							{userData.sublogin && (
+								<React.Fragment>
+									<TextArea color="rgba(0, 0, 0, 0.2)">&nbsp;:&nbsp;</TextArea>
+									<TextArea>{userData.sublogin}</TextArea>
+								</React.Fragment>
+							)}
+						</UserInfoStyled>
+						<Button
+							padding="4px 6px"
+							styleType="nonBackground"
+							onClick={logout}
+						>
+							<TextArea>Выйти</TextArea>
+							<StyledLogoutIcon />
+						</Button>
+						<StyledFullscreen
+							padding="7px"
+							styleType="nonBackground"
+							onClick={toggleFullScreen}
+						>
+							{isFullscreen ? <CloseFullscreenIcon /> : <OpenFullscreenIcon />}
+						</StyledFullscreen>
+					</RightSideContainer>
+				</HeaderContainer>
+				<HistoryContainer>
+					<HistoryList ref={historyList} scrollBlock={inCopyAnimation}>
+						{historyItems.map(({ success, queryName, queryBody }, id) => (
+							<HistoryItem
+								onDelete={removeHistoryItem}
+								onExecute={(id) => {
+									const executeJSON = historyItems[id].queryBody
+									setQueryJSON(executeJSON)
+									queryGo(executeJSON)
+								}}
+								id={id}
+								key={id}
+								success={success}
+								query={queryName}
+								queryBody={queryBody}
+							/>
+						))}
+					</HistoryList>
+					<StyledDeleteButton styleType="nonBackground" padding="0 13px">
+						<GradientEffect />
+						<DeleteHistoryIcon onClick={clearHistory} />
+					</StyledDeleteButton>
+				</HistoryContainer>
+				<StyledSplit
+					sizes={windowsProportion}
+					onDragEnd={(e) => {
+						updateProportion(e)
+						arrayToStorage('proportion', e)
+					}}
+					gutterAlign="center"
+					gutter={() => {
+						const div = document.createElement('div')
+						div.innerHTML = ReactDOMServer.renderToStaticMarkup(
+							<StyledDragIcon />
+						)
+						return div.firstChild
+					}}
+					cursor="col-resize"
+				>
+					<ConsoleWindow
+						onClick={() =>
+							errorsWindows.query &&
+							setErrorsWindows((prevState) => ({
+								...prevState,
+								query: false,
+							}))
+						}
+						value={queryJSON}
+						onChange={(value) => setQueryJSON(value)}
+						title="Запрос:"
+						lock={false}
+						error={errorsWindows.query}
+					/>
+					<ConsoleWindow
+						value={responseJSON}
+						title="Ответ:"
+						lock={true}
+						error={errorsWindows.response}
+					/>
+				</StyledSplit>
+				<FooterContainer>
+					<Button
+						padding="8px 18px"
+						styleType="submit"
+						loading={loadingButtonState}
+						onClick={() =>
+							isValidJSON(queryJSON)
+								? queryGo(queryJSON)
+								: setErrorsWindows((prevState) => ({
+										...prevState,
+										query: true,
+								  }))
+						}
+					>
+						<TextArea color="#FFFFFF">Отправить</TextArea>
+					</Button>
+					<GitLink
+						title="@spaceboom73/sendsay-api-console"
+						link="https://github.com/spaceboom73/sendsay-api-console"
+					/>
+					<Button
+						padding="6px 4px"
+						styleType="nonBackground"
+						onClick={formatWindows}
+					>
+						<StyledFormatIcon />
+						<TextArea>Форматировать</TextArea>
+					</Button>
+				</FooterContainer>
+			</ConsoleContainer>
+		</ConsolePageContainer>
+	) : (
+		<LoadingContainer>
+			<LoadingIcon />
+		</LoadingContainer>
 	)
 }

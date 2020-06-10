@@ -10,6 +10,7 @@ const ButtonStyled = styled.button`
 	cursor: pointer;
 	border: none;
 	line-height: 24px;
+	overflow: hidden;
 	padding: ${({ padding }) => (padding ? padding : '5px 32px')};
 	${({ styleType, disabled }) =>
 		styleType === 'submit' &&
@@ -72,19 +73,21 @@ const Loader = styled(IconLoading)`
 	}
 `
 export const Button = (params) => {
-	const { children, loading } = params
+	const { children } = params
 
+	const loading = useRef(params.loading)
 	const [buttonWidth, setWidth] = useState(0)
 	const button = useRef()
+
 	useEffect(() => {
-		if (button.current) {
-			setWidth(button.current.getBoundingClientRect().width - 20)
+		if (button.current && loading.current !== undefined) {
+			setWidth(() => button.current.children[0].getBoundingClientRect().width)
 		}
 	}, [button])
 
 	return (
 		<ButtonStyled ref={button} {...params}>
-			{loading === 'true' ? <Loader width={buttonWidth} /> : children}
+			{params.loading === 'true' ? <Loader width={buttonWidth} /> : children}
 		</ButtonStyled>
 	)
 }

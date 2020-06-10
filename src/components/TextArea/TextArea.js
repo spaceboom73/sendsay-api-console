@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react'
 import styled from 'styled-components'
 
 const Text = styled.span`
-	${({ color, fontSize, whiteSpace, width }) =>
+	${({ color, fontSize, whiteSpace }) =>
 		`color: ${color};
 		font-size: ${fontSize}px;
 		white-space: ${whiteSpace};
@@ -22,11 +22,23 @@ const Text = styled.span`
 `
 
 const TextArea = (
-	{ color = '#0D0D0D', fontSize = 16, whiteSpace = 'break-spaces', children },
+	{
+		color = '#0D0D0D',
+		fontSize = 16,
+		whiteSpace = 'break-spaces',
+		children,
+		...props
+	},
 	ref
 ) => {
 	return (
-		<Text ref={ref} color={color} whiteSpace={whiteSpace} fontSize={fontSize}>
+		<Text
+			ref={ref}
+			color={color}
+			whiteSpace={whiteSpace}
+			fontSize={fontSize}
+			{...props}
+		>
 			{children}
 		</Text>
 	)

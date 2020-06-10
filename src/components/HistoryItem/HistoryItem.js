@@ -34,6 +34,9 @@ const StatusStyled = styled.div`
 const StyledDropIcon = styled(DragDropIcon)`
 	margin-left: 8px;
 	width: 8px;
+	&:hover circle {
+		fill-opacity: 0.4;
+	}
 `
 
 const StyledDropDown = styled.div`
@@ -104,7 +107,15 @@ const TextAreaContainer = styled(TextArea)`
 	height: 100%;
 `
 
-export const HistoryItem = ({ id, success, query, ...props }) => {
+export const HistoryItem = ({
+	id,
+	success,
+	query,
+	queryBody,
+	onDelete,
+	onExecute,
+	...props
+}) => {
 	const [dropDown, updateDropDown] = useState({
 		open: false,
 		coordinate: {
@@ -135,6 +146,8 @@ export const HistoryItem = ({ id, success, query, ...props }) => {
 	}, [toggledId, id, dropDown.open])
 
 	const dropDownToggle = (e) => {
+		e.preventDefault()
+		e.stopPropagation()
 		const coordinateInfo = item.current.getBoundingClientRect()
 		const coordinate = {
 			x: Math.floor(coordinateInfo.left),
@@ -151,30 +164,38 @@ export const HistoryItem = ({ id, success, query, ...props }) => {
 			dispatch(toggleDropDown(id))
 		}
 	}
-	const dropDownClick = (operation) => {
+	const dropDownClick = (e, operation) => {
+		if (e) {
+			e.stopPropagation()
+			e.preventDefault()
+		}
 		dispatch(toggleDropDown(-1))
 		switch (operation) {
 			case 'execute': {
+				onExecute(id)
 				break
 			}
 			case 'copy': {
-				const containerCoord = queryText.current.getBoundingClientRect()
-				setCopy((prevState) => ({
-					...prevState,
-					position: {
-						top: containerCoord.top,
-						left: containerCoord.left,
-					},
-					state: true,
-				}))
-				dispatch(inAnimation(true))
-				setTimeout(() => {
-					setCopy((prevState) => ({ ...prevState, state: false }))
-					dispatch(inAnimation(false))
-				}, 1800)
+				navigator.clipboard.writeText(queryBody).then(() => {
+					const containerCoord = queryText.current.getBoundingClientRect()
+					setCopy((prevState) => ({
+						...prevState,
+						position: {
+							top: containerCoord.top,
+							left: containerCoord.left,
+						},
+						state: true,
+					}))
+					dispatch(inAnimation(true))
+					setTimeout(() => {
+						setCopy((prevState) => ({ ...prevState, state: false }))
+						dispatch(inAnimation(false))
+					}, 1000)
+				})
 				break
 			}
 			case 'delete': {
+				onDelete(id)
 				break
 			}
 			default: {
@@ -184,7 +205,7 @@ export const HistoryItem = ({ id, success, query, ...props }) => {
 	}
 
 	return (
-		<ItemContainer ref={item}>
+		<ItemContainer ref={item} onClick={() => dropDownClick(null, 'execute')}>
 			<StatusStyled success={success} />
 			<TextAreaContainer>
 				{copy.state && (
@@ -203,13 +224,13 @@ export const HistoryItem = ({ id, success, query, ...props }) => {
 				<StyledDropDown coordinate={dropDown.coordinate}>
 					<StyledButton
 						styleType="nonBackground"
-						onClick={() => dropDownClick('execute')}
+						onClick={(e) => dropDownClick(e, 'execute')}
 					>
 						Выполнить
 					</StyledButton>
 					<StyledButton
 						styleType="nonBackground"
-						onClick={() => dropDownClick('copy')}
+						onClick={(e) => dropDownClick(e, 'copy')}
 					>
 						Скопировать
 					</StyledButton>
@@ -217,7 +238,7 @@ export const HistoryItem = ({ id, success, query, ...props }) => {
 					<StyledButton
 						destirutive
 						styleType="nonBackground"
-						onClick={() => dropDownClick('delete')}
+						onClick={(e) => dropDownClick(e, 'delete')}
 					>
 						Удалить
 					</StyledButton>
@@ -231,4 +252,7 @@ HistoryItem.propTypes = {
 	id: PropTypes.number.isRequired,
 	success: PropTypes.bool.isRequired,
 	query: PropTypes.string.isRequired,
+	queryBody: PropTypes.string.isRequired,
+	onDelete: PropTypes.func.isRequired,
+	onExecute: PropTypes.func.isRequired,
 }

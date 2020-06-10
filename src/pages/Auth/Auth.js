@@ -11,6 +11,7 @@ import {
 	changeAuthicatedStatus,
 } from '../../redux/actions'
 import { useHistory } from 'react-router-dom'
+import { GitLink } from '../../components/GitLink/GitLink'
 
 const AuthContainer = styled.div`
 	display: flex;
@@ -20,6 +21,9 @@ const AuthContainer = styled.div`
 	height: 100vh;
 	width: 100vw;
 	background-color: #f7f7f7;
+`
+const StyledLink = styled(GitLink)`
+	margin-top: 20px;
 `
 
 export const Auth = () => {
@@ -54,6 +58,10 @@ export const Auth = () => {
 		<AuthContainer>
 			<Logo />
 			<LoginForm onSubmit={onAuth} />
+			<StyledLink
+				title="@spaceboom73/sendsay-api-console"
+				link="https://github.com/spaceboom73/sendsay-api-console"
+			/>
 		</AuthContainer>
 	)
 }
