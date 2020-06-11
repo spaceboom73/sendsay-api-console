@@ -22,6 +22,7 @@ import { ReactComponent as LoadingIcon } from '../../assets/images/loader.svg'
 import { changeAuthicatedStatus, toggleDropDown } from '../../redux/actions'
 import { ConsoleWindow } from '../../components/ConsoleWindow/ConsoleWindow'
 import { GitLink } from '../../components/GitLink/GitLink'
+import { useCookies } from 'react-cookie'
 
 const ConsolePageContainer = styled.div`
 	display: flex;
@@ -168,6 +169,7 @@ export const Console = () => {
 	const inCopyAnimation = useSelector((state) => state.inCopyAnimation)
 	const dispatch = useDispatch()
 	const history = useHistory()
+	const [cookies, , removeCookie] = useCookies(['name'])
 	const [isFullscreen, setFullscreen] = useState(false)
 	const [apiConnection, setConnection] = useState(null)
 	const [pageLoaded, updatePageLoaded] = useState(false)
@@ -192,18 +194,17 @@ export const Console = () => {
 
 	useEffect(() => {
 		document.onfullscreenchange = () => setFullscreen((prevState) => !prevState)
-		const data = JSON.parse(localStorage.getItem('authData'))
 		setConnection(
 			new Sendsay({
 				auth: {
-					...data,
+					...cookies.authData,
 				},
 			})
 		)
 		return () => {
 			document.onfullscreenchange = () => {}
 		}
-	}, [])
+	}, [cookies])
 	useEventListener(
 		'scroll',
 		historyList,
@@ -223,7 +224,7 @@ export const Console = () => {
 					action: 'pong',
 				})
 				.then((res) => {
-					const { sublogin } = JSON.parse(localStorage.getItem('authData'))
+					const { sublogin } = cookies.authData
 					updatePageLoaded(true)
 					setUserData({
 						login: res.account,
@@ -236,10 +237,10 @@ export const Console = () => {
 						proportionOfStorage ? JSON.parse(proportionOfStorage) : [50, 50]
 					)
 				})
-	}, [apiConnection])
+	}, [apiConnection, history, cookies])
 
 	const logout = () => {
-		localStorage.removeItem('authData')
+		removeCookie('authData')
 		dispatch(changeAuthicatedStatus(false))
 		arrayToStorage('history', [])
 		arrayToStorage('proportion', [])

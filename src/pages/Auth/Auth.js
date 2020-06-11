@@ -12,6 +12,7 @@ import {
 } from '../../redux/actions'
 import { useHistory } from 'react-router-dom'
 import { GitLink } from '../../components/GitLink/GitLink'
+import { useCookies } from 'react-cookie'
 
 const AuthContainer = styled.div`
 	display: flex;
@@ -29,6 +30,7 @@ const StyledLink = styled(GitLink)`
 export const Auth = () => {
 	const dispatch = useDispatch()
 	const browserUrl = useHistory()
+	const [, setCookie] = useCookies(['authData'])
 	const isAuthicated = useSelector((state) => state.authicated)
 
 	const onAuth = ({ login, password, sublogin }) => {
@@ -44,7 +46,7 @@ export const Auth = () => {
 			.then(() => {
 				dispatch(onLoginError(null))
 				dispatch(changeAuthicatedStatus(true))
-				localStorage.setItem('authData', JSON.stringify(authData))
+				setCookie('authData', authData, { path: '/', maxAge: 3600 * 6 })
 				browserUrl.push('/console')
 			})
 			.catch((err) => dispatch(onLoginError(err)))

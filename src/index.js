@@ -6,15 +6,18 @@ import { createStore, applyMiddleware } from 'redux'
 import { rootReducer } from './redux/rootReducer'
 import logger from 'redux-logger'
 import { Provider } from 'react-redux'
+import { CookiesProvider } from 'react-cookie'
 import './index.css'
 import 'antd/dist/antd.css'
 
 const store = createStore(rootReducer, applyMiddleware(logger))
 
 ReactDOM.render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
+	<CookiesProvider>
+		<Provider store={store}>
+			<App />
+		</Provider>
+	</CookiesProvider>,
 	document.getElementById('root')
 )
 
