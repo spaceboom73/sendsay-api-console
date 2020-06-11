@@ -10,7 +10,7 @@ const ButtonStyled = styled.button`
 	cursor: pointer;
 	border: none;
 	line-height: 24px;
-	overflow: hidden;
+	${({ loading }) => loading && `overflow: hidden;`}
 	padding: ${({ padding }) => (padding ? padding : '5px 32px')};
 	${({ styleType, disabled }) =>
 		styleType === 'submit' &&
