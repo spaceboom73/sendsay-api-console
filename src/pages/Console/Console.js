@@ -62,14 +62,15 @@ const HistoryContainer = styled.div`
 	background-color: #f6f6f6;
 	border-top: 1px solid rgba(0, 0, 0, 0.2);
 	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-	height: 50px;
+	min-height: 50px;
 	max-width: 100vw;
 	min-width: 640px;
 `
 const HistoryList = styled.div`
 	flex: 1 1 1374px;
 	display: flex;
-	padding: 10px 0 10px 15px;
+	align-items: center;
+	padding-left: 15px;
 	white-space: nowrap;
 	width: 100%;
 	overflow-x: ${({ scrollBlock }) => (scrollBlock ? 'hidden' : 'auto')};
@@ -100,7 +101,7 @@ const GradientEffect = styled.div`
 	position: relative;
 	width: 15px;
 	margin-right: -15px;
-	height: 48px;
+	height: 47px;
 	left: -29px;
 	background: linear-gradient(
 		269.98deg,
@@ -255,7 +256,9 @@ export const Console = () => {
 				document.cancelFullScreen ||
 				document.webkitCancelFullScreen ||
 				document.exitFullscreen
-		!state ? requestFunc.call(doc) : cancelFunc.call(document)
+		!state
+			? requestFunc && requestFunc.call(doc)
+			: cancelFunc && cancelFunc.call(document)
 	}
 	const isValidJSON = (text) => {
 		try {
@@ -312,6 +315,7 @@ export const Console = () => {
 										},
 										...prevState,
 								  ]
+						if (historyArray.length > 15) historyArray.pop()
 						arrayToStorage('history', historyArray)
 						return historyArray
 					})

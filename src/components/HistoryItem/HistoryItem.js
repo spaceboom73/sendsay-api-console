@@ -80,6 +80,8 @@ const StyledTextArea = styled(TextArea)`
 	display: block;
 	position: relative;
 	z-index: 1;
+	text-align: center;
+	width: ${({ width }) => (width < 50 ? 100 : width)}px;
 	animation: 1.8s hidder;
 	@keyframes hidder {
 		from {
@@ -123,7 +125,7 @@ export const HistoryItem = ({
 			y: 0,
 		},
 	})
-
+	const [width, setWidth] = useState(0)
 	const [copy, setCopy] = useState({
 		state: false,
 		position: {
@@ -145,12 +147,26 @@ export const HistoryItem = ({
 		}
 	}, [toggledId, id, dropDown.open])
 
+	useEffect(() => {
+		const clickOnAnother = (e) => {
+			if (!item.current.contains(e.target) && toggledId !== -1) {
+				dispatch(toggleDropDown(-1))
+			}
+		}
+		document.addEventListener('click', clickOnAnother)
+		return () => {
+			document.removeEventListener('click', clickOnAnother)
+		}
+	}, [dispatch, toggledId])
+
 	const dropDownToggle = (e) => {
 		e.preventDefault()
 		e.stopPropagation()
 		const coordinateInfo = item.current.getBoundingClientRect()
+		let x = coordinateInfo.left + coordinateInfo.width - 131
+		x = x < 0 ? coordinateInfo.left : x
 		const coordinate = {
-			x: Math.floor(coordinateInfo.left),
+			x: Math.floor(x),
 			y: Math.floor(coordinateInfo.top + coordinateInfo.height),
 		}
 		updateDropDown((prevState) => ({
@@ -176,22 +192,24 @@ export const HistoryItem = ({
 				break
 			}
 			case 'copy': {
-				navigator.clipboard.writeText(queryBody).then(() => {
-					const containerCoord = queryText.current.getBoundingClientRect()
-					setCopy((prevState) => ({
-						...prevState,
-						position: {
-							top: containerCoord.top,
-							left: containerCoord.left,
-						},
-						state: true,
-					}))
-					dispatch(inAnimation(true))
-					setTimeout(() => {
-						setCopy((prevState) => ({ ...prevState, state: false }))
-						dispatch(inAnimation(false))
-					}, 1000)
-				})
+				navigator.clipboard &&
+					navigator.clipboard.writeText(queryBody).then(() => {
+						const containerCoord = queryText.current.getBoundingClientRect()
+						setWidth(containerCoord.width)
+						setCopy((prevState) => ({
+							...prevState,
+							position: {
+								top: containerCoord.top,
+								left: containerCoord.left,
+							},
+							state: true,
+						}))
+						dispatch(inAnimation(true))
+						setTimeout(() => {
+							setCopy((prevState) => ({ ...prevState, state: false }))
+							dispatch(inAnimation(false))
+						}, 1000)
+					})
 				break
 			}
 			case 'delete': {
@@ -209,7 +227,9 @@ export const HistoryItem = ({
 			<StatusStyled success={success} />
 			<TextAreaContainer>
 				{copy.state && (
-					<StyledTextArea fontSize={12}>Скопировано</StyledTextArea>
+					<StyledTextArea width={width} fontSize={12}>
+						Скопировано
+					</StyledTextArea>
 				)}
 				<AbsoluteTextArea
 					ref={queryText}

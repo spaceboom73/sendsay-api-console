@@ -25,7 +25,7 @@ const TextArea = (
 	{
 		color = '#0D0D0D',
 		fontSize = 16,
-		whiteSpace = 'break-spaces',
+		whiteSpace = 'inherit',
 		children,
 		...props
 	},
