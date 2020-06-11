@@ -239,6 +239,8 @@ export const Console = () => {
 				})
 	}, [apiConnection, history, cookies])
 
+	useEffect(() => console.log(historyItems), [historyItems])
+
 	const logout = () => {
 		removeCookie('authData')
 		dispatch(changeAuthicatedStatus(false))
@@ -280,6 +282,7 @@ export const Console = () => {
 		const request = JSON.parse(json)
 		const historyData = request['action']
 		let success = null
+		let errorJSON = null
 		apiConnection &&
 			apiConnection
 				.request(request)
@@ -289,7 +292,8 @@ export const Console = () => {
 					success = true
 				})
 				.catch((err) => {
-					setResponseJSON(JSON.stringify(err))
+					errorJSON = JSON.stringify(err)
+					setResponseJSON(errorJSON)
 					setErrorsWindows((prevState) => ({ ...prevState, response: true }))
 					success = false
 				})
@@ -297,25 +301,19 @@ export const Console = () => {
 					setButtonLoading('false')
 					setHistoryItems((prevState) => {
 						const queryArray = prevState.map((item) => item.queryName)
-						const indexInHistory = queryArray.indexOf(historyData)
-						const historyArray =
-							indexInHistory === -1
-								? [
-										{
-											success,
-											queryName: historyData,
-											queryBody: json,
-										},
-										...prevState,
-								  ]
-								: prevState.splice(indexInHistory, 1) && [
-										{
-											success,
-											queryName: historyData,
-											queryBody: json,
-										},
-										...prevState,
-								  ]
+						if (queryArray.indexOf(historyData) !== -1)
+							prevState.splice(queryArray.indexOf(historyData), 1)
+
+						const historyArray = [
+							{
+								success,
+								queryName: historyData,
+								queryBody: json,
+								...(!success && { errorJSON }),
+							},
+							...prevState,
+						]
+
 						if (historyArray.length > 15) historyArray.pop()
 						arrayToStorage('history', historyArray)
 						return historyArray
@@ -393,7 +391,7 @@ export const Console = () => {
 								onDelete={removeHistoryItem}
 								onExecute={(id) => {
 									const executeJSON = historyItems[id].queryBody
-									setQueryJSON(executeJSON)
+									setQueryJSON(JSON.stringify(JSON.parse(executeJSON), null, 4))
 									queryGo(executeJSON)
 								}}
 								id={id}
