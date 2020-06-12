@@ -239,8 +239,6 @@ export const Console = () => {
 				})
 	}, [apiConnection, history, cookies])
 
-	useEffect(() => console.log(historyItems), [historyItems])
-
 	const logout = () => {
 		removeCookie('authData')
 		dispatch(changeAuthicatedStatus(false))
